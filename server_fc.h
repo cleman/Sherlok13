@@ -7,4 +7,6 @@ typedef struct {
     char *nom;
 }client;
 
+void traitement_C(char *buffer, client (*tab)[4], int *nb_joueur);
+
 #endif

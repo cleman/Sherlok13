@@ -14,6 +14,14 @@
 
 int main(int argc, char *argv[])
 {
+	client tab[4];	// Données des joueurs
+	int nb_joueur = 0;	// Nombre de joueurs
+	for (int i = 0; i < 4; i++) {
+		tab[i].ip_addr = "my ip addr";
+		tab[i].nom = "my name";
+		tab[i].numport = 12345;
+	}
+
     int sockfd, newsockfd, portno;
     socklen_t clilen;
     char buffer[256];
@@ -73,9 +81,14 @@ int main(int argc, char *argv[])
 
 		printf("Received packet from %s:%d\nData: [%s]\n\n",
 		inet_ntoa(cli_addr.sin_addr), ntohs(cli_addr.sin_port), buffer);
-		printf("Premiere charactère : %c\n", buffer[0]);
+		printf("Premier caractère : %c\n", buffer[0]);
 		if (buffer[0] == 'C') {		// Première connexion
-			
+			traitement_C(buffer, &tab, &nb_joueur);
+
+			printf("nb_joueur : %d\n", nb_joueur);
+			printf("Addresse du joueur %d : %s\n", nb_joueur, tab[nb_joueur-1].ip_addr);
+			printf("Numéro de port de J%d : %d\n", nb_joueur, tab[nb_joueur-1].numport);
+			printf("Nom de J%d : %s\n", nb_joueur, tab[nb_joueur-1].nom);
 		}
 		else if (buffer[0] == 'O') {		// Action 1 (all)
 			
