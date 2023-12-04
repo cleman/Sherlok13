@@ -63,22 +63,37 @@ int main(int argc, char *argv[])
 			return 1;
 		}
 
-			bzero(buffer,256);
-			n = read(newsockfd,buffer,255);
-			if (n < 0) 
+		bzero(buffer,256);
+		n = read(newsockfd,buffer,255);
+		if (n < 0) 
 		{
 			fprintf(stderr,"Impossible de faire l'appel système read().\n");
 			return 1;
 		}
 
-			printf("Received packet from %s:%d\nData: [%s]\n\n",
-			inet_ntoa(cli_addr.sin_addr), ntohs(cli_addr.sin_port), buffer);
-			printf("Premiere charactère : %c", buffer[0]);
-			//if (strcmp(&buffer[0],"C") == 0) {
-			//	printf("Première connexion, appel à la fonction");
-			//}
+		printf("Received packet from %s:%d\nData: [%s]\n\n",
+		inet_ntoa(cli_addr.sin_addr), ntohs(cli_addr.sin_port), buffer);
+		printf("Premiere charactère : %c\n", buffer[0]);
+		if (buffer[0] == 'C') {		// Première connexion
+			
+		}
+		else if (buffer[0] == 'O') {		// Action 1 (all)
+			
+		}
+		else if (buffer[0] == 'S') {		// Action 2 (joueur x)
+			
+		}
+		else if (buffer[0] == 'G') {		// Action 3 (accusation)
+			
+		}
+		else if (buffer[0] == 'M') {		// Message
+			
+		}
+		else if (buffer[0] == 'F') {		// Fin
+			
+		}
 
-			close(newsockfd);
+		close(newsockfd);
 	}
 
 	close(sockfd);
