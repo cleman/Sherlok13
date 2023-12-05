@@ -11,15 +11,20 @@
 
 #include "server_fc.h"
 
+extern char *carteNom[13];
+extern int deck[13];
+extern int cardsValue[13][8];
+extern int playerValue[4][8];
 
 int main(int argc, char *argv[])
 {
 	client tab[4];	// Données des joueurs
 	int nb_joueur = 0;	// Nombre de joueurs
+	int isCardGive = 0, isStart;
 	for (int i = 0; i < 4; i++) {
-		tab[i].ip_addr = "my ip addr";
-		tab[i].nom = "my name";
-		tab[i].numport = 12345;
+		tab[i].ip_addr = "localhost";
+		tab[i].nom = "-";
+		tab[i].numport = -1;
 	}
 
     int sockfd, newsockfd, portno;
@@ -61,9 +66,32 @@ int main(int argc, char *argv[])
 	// On commence à écouter sur la socket. Le 5 est le nombre max
 	// de connexions pendantes
 
+	shuffle_card();
+	for (int i = 0; i < 13; i++) {
+		printf("%d ", deck[i]);
+	}
+	printf("\n");
+
     listen(sockfd,5);
 	while (1)
-	{    
+	{
+		if (nb_joueur == 4 && isStart == 0) {
+			isStart = 1;
+			printf("La partie commence");
+			char msg_G[1] = "D";
+			bc(&tab, msg_G);
+		}
+		if (nb_joueur == 4 && isCardGive == 0) {
+			isCardGive = 1;
+			char msg_v[16];
+			for (int i = 0; i < 4; i++){
+				for (int j = 0; j < 3; j++) {
+					sprintf(msg_v, "V %d", deck[i*3+j]);
+					send_message(tab[i].ip_addr, tab[i].numport, msg_v);
+				}
+			}
+		} 
+
 		newsockfd = accept(sockfd, (struct sockaddr *) &cli_addr, &clilen);
 		if (newsockfd < 0) 
 		{
@@ -81,14 +109,21 @@ int main(int argc, char *argv[])
 
 		printf("Received packet from %s:%d\nData: [%s]\n\n",
 		inet_ntoa(cli_addr.sin_addr), ntohs(cli_addr.sin_port), buffer);
-		printf("Premier caractère : %c\n", buffer[0]);
+		//printf("Premier caractère : %c\n", buffer[0]);
 		if (buffer[0] == 'C') {		// Première connexion
+			printf("message de type C, valeur de nb_joueur : %d\n", nb_joueur);
 			traitement_C(buffer, &tab, &nb_joueur);
 
 			printf("nb_joueur : %d\n", nb_joueur);
 			printf("Addresse du joueur %d : %s\n", nb_joueur, tab[nb_joueur-1].ip_addr);
 			printf("Numéro de port de J%d : %d\n", nb_joueur, tab[nb_joueur-1].numport);
 			printf("Nom de J%d : %s\n", nb_joueur, tab[nb_joueur-1].nom);
+
+			char msg_I[8];
+			sprintf(msg_I,"I %d", nb_joueur-1);
+			send_message(tab[nb_joueur-1].ip_addr, tab[nb_joueur-1].numport, msg_I);
+
+			send_list(&tab, nb_joueur);
 		}
 		else if (buffer[0] == 'O') {		// Action 1 (all)
 			
