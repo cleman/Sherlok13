@@ -27,8 +27,6 @@ char *carteNom[] = {"Sebastian Moran",
                     "Mary Morstan",
                     "Jame Moriatry"};
 
-int my_deck[3] = {-1,-1,-1};
-
 int cardsValue[13][8] = {
     {0,0,1,0,0,0,0,1},
     {0,1,0,0,0,1,0,1},
@@ -44,26 +42,23 @@ int cardsValue[13][8] = {
     {0,0,0,0,1,1,0,0},
     {0,1,0,0,0,0,0,1}};
 
-char *listeJoueur[] = {"-","-","-","-"};
-
 char buffer_server[256];
 int my_server_numport;
 char my_server_adress;
 char *server_address;
 int nb_carte = 0;
-int my_id = -1;
 int synchro_L = 0;
-int playerValue[4][8];  // Tableau 4*8 des figure des joueurs
+int isWantCopytable = 0;
+
+#include "global_var.h"
 
 void create_table() {
-    for (int i = 0; i < 3; i++) {
-        for (int j = 0; j < 8; j++) {
-            playerValue[i][j] = 0;
-        }
+    for (int j = 0; j < 8; j++) {
+        tableCartes[myId][j] = 0;
     }
     for (int i = 0; i < 3; i++) {
         for (int j = 0; j < 8; j++) {
-            playerValue[my_id][j] += cardsValue[my_deck[i]][j];
+            tableCartes[myId][j] += cardsValue[myDeck[i]][j];
         }
     }
 }
@@ -72,7 +67,9 @@ void print_playerValue() {
     for (int i = 0; i < 4; i++) {
         printf("Joueur %d : ", i);
         for (int j = 0; j < 8; j++) {
-            printf("0%d ", playerValue[i][j]);
+            if (tableCartes[i][j] != -1 && tableCartes[i][j] != 100) printf("0%d ", tableCartes[i][j]);
+            else if (tableCartes[i][j] == 100) printf("** ");
+            else printf("%d ", tableCartes[i][j]);
         }
         printf("\n");
     }
@@ -164,7 +161,7 @@ void *server_tcp() {
 	// de connexions pendantes
 
     listen(sockfd,5);
-	while (1)
+	while (!quit)
 	{    
 		newsockfd = accept(sockfd, (struct sockaddr *) &cli_addr, &clilen);
 		if (newsockfd < 0) 
@@ -184,31 +181,71 @@ void *server_tcp() {
         //printf("Received packet from %s:%d\nData: [%s]\n\n",
         //inet_ntoa(cli_addr.sin_addr), ntohs(cli_addr.sin_port), buffer_server);
 
-        //send_message("127.0.0.1",32000, buffer_server);
+        // Reception carte
         if (buffer_server[0] == 'V') {
             int x;
             sscanf(buffer_server,"V %d",&x);
-            my_deck[nb_carte] = x;
+            myDeck[nb_carte] = x;
             nb_carte++;
+            printf("Ma carte %d est %d\n", nb_carte,myDeck[nb_carte-1]);
         }
+        // Recepetion id
         if (buffer_server[0] == 'I') {
             int x;
             sscanf(buffer_server, "I %d", &x);
-            my_id = x;
+            myId = x;
         }
+        // Recepetion liste joueur
         if (buffer_server[0] == 'L') {
             char name[4][32];
             sscanf(buffer_server, "L %s %s %s %s", name[0], name[1], name[2], name[3]);
-            listeJoueur[0] = name[0];
-            listeJoueur[1] = name[1];
-            listeJoueur[2] = name[2];
-            listeJoueur[3] = name[3];
+            strcpy(playerName[0], name[0]);
+            strcpy(playerName[1], name[1]);
+            strcpy(playerName[2], name[2]);
+            strcpy(playerName[3], name[3]);
 
             synchro_L = 1;
             while (synchro_L);
         }
+        // Reception debut de partie
         if (buffer_server[0] == 'D') {
-            printf("La partie commence\n");
+            printf("D : La partie commence\n");
+        }
+        // Reception joueur actif
+        if (buffer_server[0] == 'M') {
+            printf("M : Joueur %c joue\n", buffer_server[2]);
+            if (atoi(&buffer_server[2]) == myId) {
+                myTurn = 1;
+                //printf("C'est à mon tour de jouer\n");
+            }
+            else myTurn = 0;
+        }
+
+        // Retour action 1
+        if (buffer_server[0] == 'R') {
+            int obj, id_j, data;
+            sscanf(buffer_server, "R %d %d %d", &id_j, &obj, &data);
+            printf("R : Donnée reçu sur le joueur %d : %d\n", id_j, data);
+            if (tableCartes[id_j][obj] == -1 || tableCartes[id_j][obj] == 100) {
+                tableCartes[id_j][obj] = data;
+            }
+            print_playerValue();
+        }
+
+        // Proposition coupable
+        if (buffer_server[0] == 'F') {
+            if (atoi(&buffer_server[4]) == 1) {
+                printf("F : Partie gagné par Joueur %d. Le coupable est %s\n", atoi(&buffer_server[2]), carteNom[atoi(&buffer_server[6])]);
+                quit = 1;
+                myTurn = 0;
+            }
+            else printf("F : Le joueur %d s'est trompé en denoncant %s\n", atoi(&buffer_server[2]), carteNom[atoi(&buffer_server[6])]);
+        }
+        
+        // Message to display
+        if (buffer_server[0] == 'T') {
+            //sscanf(msgDisplay, "T %s");
+            strcpy(msgDisplay, buffer_server + 2);
         }
 
 		close(newsockfd);

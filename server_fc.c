@@ -45,6 +45,61 @@ int cardsValue[13][8] = {
     {0,1,0,0,0,0,0,1}};
 
 int playerValue[4][8];
+int quit = 0;
+
+// O
+void fc_act_1(client (*tab)[4], char *buffer, int joueur_actif) {
+    int k = atoi(&buffer[4]);
+    printf("Action 1 pour l'objet %d\n",k);
+    for (int i = 0; i < 4; i++) {
+        if (i != joueur_actif) {
+            char msg_R[64];
+            int c;
+            if (playerValue[i][k] == 0) c = 0;
+            else c = 100;
+            sprintf(msg_R, "R %d %d %d", i, k, c);
+            bc(tab, msg_R);
+        }
+    }
+
+    char msg_T[128];
+    sprintf(msg_T, "T Le joueur %d à joue l'action 1 sur l'objet %d", joueur_actif, k);
+    bc(tab, msg_T);
+}
+
+void fc_act_2(client (*tab)[4], char *buffer) {
+    int joueur = atoi(&buffer[4]);
+    int obj = atoi(&buffer[6]);
+    printf("Action 2 pour le joueur %d sur l'objet %d\n", joueur, obj);
+    char msg_R[64];
+    sprintf(msg_R, "R %d %d %d", joueur, obj, playerValue[joueur][obj]);
+    bc(tab, msg_R);
+
+    char msg_T[128];
+    sprintf(msg_T, "T Le joueur %d a joue l'action 2 sur le joueur %d et sur l'objet %d ", atoi(&buffer[2]), joueur, obj);
+    bc(tab, msg_T);
+}
+
+void fc_act_3(client (*tab)[4], char *buffer) {
+    int k = atoi(&buffer[4]);
+    printf("Action 3 sur %s\n", carteNom[deck[k]]);
+    int id_G = atoi(&buffer[2]); // Joueur qui a guilt
+    char msg_F[64];
+    char msg_T[128];
+    if (k != deck[12]) {
+        printf("Mauvaise proposition\n");
+        sprintf(msg_F,"F %d 0 %d", id_G, k);   // Mauvaise réponse
+        sprintf(msg_T, "T Le joueur %d a denonce %s et s'est trompe ", id_G, carteNom[k]);
+    }
+    else {
+        printf("Bonne proposition\n");
+        sprintf(msg_F,"F %d 1 %d", id_G, k);  // Bonne réponse, partie finie
+        quit = 1;
+        sprintf(msg_T, "T Le joueur %d a trouve le coupable : %s ", id_G, carteNom[k]);
+    }
+    bc(tab, msg_F);
+    bc(tab, msg_T);
+}
 
 void print_card() {
     for (int i = 0; i < 13; i++) {
@@ -87,7 +142,6 @@ void shuffle_card() {
             }
         }
     }
-    print_card();
 }
 
 void traitement_C(char *buffer, client (*tab)[4], int *nb_joueur) {
@@ -95,7 +149,7 @@ void traitement_C(char *buffer, client (*tab)[4], int *nb_joueur) {
     char data[3][64];
     sscanf(buffer, "C %s %s %s", data[0], data[1], data[2]);
     // Attrivuer au tableau
-    printf("nb in fc  : %d\n", *nb_joueur);
+    //printf("nb in fc  : %d\n", *nb_joueur);
     (*tab)[*nb_joueur].ip_addr = strdup(data[0]);
     (*tab)[*nb_joueur].numport = atoi(data[1]);
     (*tab)[*nb_joueur].nom = strdup(data[2]);
@@ -165,7 +219,7 @@ int send_message(char *ip_addr, int portno, char *message) {
 
     close(sockfd);
 
-    printf("Message envoyé\n");
+    //printf("Message envoyé\n");
 
     return 0;
 }

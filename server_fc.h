@@ -14,5 +14,8 @@ void print_card();
 void shuffle_card();
 void print_playerValue();
 void bc(client(*tab)[4], char *message); // Broadcast
+void fc_act_1(client (*tab)[4], char *buffer, int joueur_actif);
+void fc_act_2(client (*tab)[4], char *buffer);
+void fc_act_3(client (*tab)[4], char *buffer);
 
 #endif
