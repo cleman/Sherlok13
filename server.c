@@ -107,10 +107,11 @@ int main(int argc, char *argv[])
 			bc(&tab, msg_M);
 
 			char msg_T[128];
-			sprintf(msg_T, "T Joueur %d joue", joueur_actif);
+			sprintf(msg_T, "T %s joue", tab[joueur_actif].nom);
 			bc(&tab, msg_T);
 		}
 
+		clilen = sizeof(cli_addr);
 		newsockfd = accept(sockfd, (struct sockaddr *) &cli_addr, &clilen);
 		if (newsockfd < 0) 
 		{
@@ -134,21 +135,19 @@ int main(int argc, char *argv[])
 			traitement_C(buffer, &tab, &nb_joueur);
 
 			printf("Nombre de joueur connecté : %d\n", nb_joueur);
-			//printf("Addresse du joueur %d : %s\n", nb_joueur, tab[nb_joueur-1].ip_addr);
-			//printf("Numéro de port de J%d : %d\n", nb_joueur, tab[nb_joueur-1].numport);
-			//printf("Nom de J%d : %s\n", nb_joueur, tab[nb_joueur-1].nom);
 
 			printf("Liste des joueurs : %s %s %s %s\n", tab[0].nom, tab[1].nom, tab[2].nom, tab[3].nom);
 
 			char msg_I[8];
 			sprintf(msg_I,"I %d", nb_joueur-1);
 			send_message(tab[nb_joueur-1].ip_addr, tab[nb_joueur-1].numport, msg_I);
-
 			send_list(&tab, nb_joueur);
 
 			char msg_T[128];
-			sprintf(msg_T, "En attente de joueur. Nombre de joueur : %d", nb_joueur-1);
-			bc(&tab, msg_T);
+			sprintf(msg_T, "T En attente de joueur. Nombre de joueur : %d", nb_joueur);
+			for (int i = 0; i < nb_joueur; i++) {
+				send_message(tab[i].ip_addr, tab[i].numport, msg_T);
+			}			
 		}
 		else if (buffer[0] == 'O') {		// Action 1 (all)
 			if (atoi(&buffer[2]) == joueur_actif) {

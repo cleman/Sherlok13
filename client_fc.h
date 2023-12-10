@@ -5,5 +5,6 @@ int send_message(char *ip_addr, int portno, char *message);
 void *server_tcp();
 void create_table();
 void print_playerValue();
+void supprimer_nouvelle_ligne(char *chaine);
 
 #endif

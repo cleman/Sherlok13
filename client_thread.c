@@ -124,6 +124,11 @@ void *thread_graphique_fn()
     // Boucle "infinie"
     while (!quit_graph)
     {
+        if (quit) {
+            joueurSel = -1;
+            objetSel = -1;
+            guiltSel = -1;
+        }
         // Evenement
         if (SDL_PollEvent(&event))
         {
@@ -135,7 +140,7 @@ void *thread_graphique_fn()
             case SDL_MOUSEBUTTONDOWN:   // Clic de la souris
                 SDL_GetMouseState(&mx, &my);
                 //printf("mx=%d my=%d\n",mx,my);
-                if ((mx < 200) && (my < 50) && (connectEnabled == 1))   // Connexion avec le bouton
+                if ((mx < 200) && (my < 50) && (connectEnabled == 1) && !quit)   // Connexion avec le bouton
                 {
                     isWantConnect = 1;
 
@@ -143,28 +148,28 @@ void *thread_graphique_fn()
 
                     connectEnabled = 0;
                 }
-                else if ((mx >= 0) && (mx < 200) && (my >= 90) && (my < 330))   // Selection joueur (action 2)
+                else if ((mx >= 0) && (mx < 200) && (my >= 90) && (my < 330)&& !quit)   // Selection joueur (action 2)
                 {
                     joueurSel = (my - 90) / 60;
                     guiltSel = -1;
                 }
-                else if ((mx >= 200) && (mx < 680) && (my >= 0) && (my < 90))   // Selection objet
+                else if ((mx >= 200) && (mx < 680) && (my >= 0) && (my < 90)&& !quit)   // Selection objet
                 {
                     objetSel = (mx - 200) / 60;
                     guiltSel = -1;
                 }
-                else if ((mx >= 100) && (mx < 250) && (my >= 350) && (my < 740))    // Selection personnage
+                else if ((mx >= 100) && (mx < 250) && (my >= 350) && (my < 740)&& !quit)    // Selection personnage
                 {
                     joueurSel = -1;
                     objetSel = -1;
                     guiltSel = (my - 350) / 30;
                 }
-                else if ((mx >= 250) && (mx < 300) && (my >= 350) && (my < 740))    // Croix sur les personnages
+                else if ((mx >= 250) && (mx < 300) && (my >= 350) && (my < 740)&& !quit)    // Croix sur les personnages
                 {
                     int ind = (my - 350) / 30;
                     guiltGuess[ind] = 1 - guiltGuess[ind];
                 }
-                else if ((mx >= 500) && (mx < 700) && (my >= 350) && (my < 450) && (myTurn == 1))    // Bouton go
+                else if ((mx >= 500) && (mx < 700) && (my >= 350) && (my < 450) && (myTurn == 1)&& !quit)    // Bouton go
                 {
                     printf("go! joueur=%d objet=%d guilt=%d\n", joueurSel, objetSel, guiltSel);
                     if (guiltSel != -1)
@@ -314,9 +319,12 @@ void *thread_graphique_fn()
         SDL_DestroyTexture(Message);
         SDL_FreeSurface(surfaceMessage);
 
+        SDL_Color red = {255, 0, 0};
         for (i = 0; i < 13; i++)
         {
-            SDL_Surface *surfaceMessage = TTF_RenderText_Solid(Sans, nbnoms[i], col1);
+            SDL_Surface *surfaceMessage;
+            if (quit && i == coupable) surfaceMessage = TTF_RenderText_Solid(Sans, nbnoms[i], red);
+            else surfaceMessage = TTF_RenderText_Solid(Sans, nbnoms[i], col1);
             SDL_Texture *Message = SDL_CreateTextureFromSurface(renderer, surfaceMessage);
 
             SDL_Rect Message_rect;
@@ -568,10 +576,15 @@ void *thread_graphique_fn()
         // SDL_RenderDrawLine(renderer, 0, 0, 200, 200);
 
         SDL_Color col = {0, 0, 0};
+        SDL_Color blue = {0, 0, 255};
+        SDL_Color green = {255, 128, 0};
         for (i = 0; i < 4; i++)
             if (strlen(playerName[i]) > 0)
             {
-                SDL_Surface *surfaceMessage = TTF_RenderText_Solid(Sans, playerName[i], col);
+                SDL_Surface *surfaceMessage;
+                if (joueur_actif == i) surfaceMessage = TTF_RenderText_Solid(Sans, playerName[i], blue);
+                else if (gagnant == i) surfaceMessage = TTF_RenderText_Solid(Sans, playerName[i], green);
+                else surfaceMessage = TTF_RenderText_Solid(Sans, playerName[i], col);
                 SDL_Texture *Message = SDL_CreateTextureFromSurface(renderer, surfaceMessage);
 
                 SDL_Rect Message_rect;              // create a rect

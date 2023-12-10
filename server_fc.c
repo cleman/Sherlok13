@@ -47,7 +47,7 @@ int cardsValue[13][8] = {
 int playerValue[4][8];
 int quit = 0;
 
-// O
+// Fonction lié à l'action 1
 void fc_act_1(client (*tab)[4], char *buffer, int joueur_actif) {
     int k = atoi(&buffer[4]);
     printf("Action 1 pour l'objet %d\n",k);
@@ -61,12 +61,9 @@ void fc_act_1(client (*tab)[4], char *buffer, int joueur_actif) {
             bc(tab, msg_R);
         }
     }
-
-    char msg_T[128];
-    sprintf(msg_T, "T Le joueur %d à joue l'action 1 sur l'objet %d", joueur_actif, k);
-    bc(tab, msg_T);
 }
 
+// Fonction lié à l'action 2
 void fc_act_2(client (*tab)[4], char *buffer) {
     int joueur = atoi(&buffer[4]);
     int obj = atoi(&buffer[6]);
@@ -74,31 +71,29 @@ void fc_act_2(client (*tab)[4], char *buffer) {
     char msg_R[64];
     sprintf(msg_R, "R %d %d %d", joueur, obj, playerValue[joueur][obj]);
     bc(tab, msg_R);
-
-    char msg_T[128];
-    sprintf(msg_T, "T Le joueur %d a joue l'action 2 sur le joueur %d et sur l'objet %d ", atoi(&buffer[2]), joueur, obj);
-    bc(tab, msg_T);
 }
 
+// Fonction lié à l'action 3
 void fc_act_3(client (*tab)[4], char *buffer) {
     int k = atoi(&buffer[4]);
-    printf("Action 3 sur %s\n", carteNom[deck[k]]);
+    printf("Action 3 sur %s\n", carteNom[k]);
     int id_G = atoi(&buffer[2]); // Joueur qui a guilt
     char msg_F[64];
-    char msg_T[128];
     if (k != deck[12]) {
         printf("Mauvaise proposition\n");
         sprintf(msg_F,"F %d 0 %d", id_G, k);   // Mauvaise réponse
-        sprintf(msg_T, "T Le joueur %d a denonce %s et s'est trompe ", id_G, carteNom[k]);
     }
     else {
         printf("Bonne proposition\n");
         sprintf(msg_F,"F %d 1 %d", id_G, k);  // Bonne réponse, partie finie
         quit = 1;
-        sprintf(msg_T, "T Le joueur %d a trouve le coupable : %s ", id_G, carteNom[k]);
+
+        char msg_T[128];
+        sprintf(msg_T, "T %s a trouve le coupable : %s ", (*tab)[id_G].nom, carteNom[k]);
+        bc(tab, msg_T);
     }
     bc(tab, msg_F);
-    bc(tab, msg_T);
+    sleep(1);
 }
 
 void print_card() {
@@ -164,6 +159,7 @@ void send_list(client (*tab)[4], int nb_joueur) {
         send_message((*tab)[i].ip_addr, (*tab)[i].numport, msg);
     }
 }
+
 
 void bc(client(*tab)[4], char *message) {
     for (int i = 0; i < 4; i++) {

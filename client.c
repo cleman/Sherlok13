@@ -30,7 +30,8 @@ char playerName[4][256] = {"-","-","-","-"};
 int myTurn = 0;
 int tableCartes[4][8];
 int quit = 0;
-char msgDisplay[128] = "Attente de joueur";
+char msgDisplay[128] = "Attente de connexion";
+int coupable = -1;
 
 int main(int argc, char *argv[])
 {

@@ -49,6 +49,8 @@ char *server_address;
 int nb_carte = 0;
 int synchro_L = 0;
 int isWantCopytable = 0;
+int joueur_actif = -1;
+int gagnant = -1;
 
 #include "global_var.h"
 
@@ -126,6 +128,16 @@ int send_message(char *ip_addr, int portno, char *message) {
     printf("Message envoyé\n");
 
     return 0;
+}
+
+void supprimer_nouvelle_ligne(char *chaine) {
+    // Recherche de la position du caractère de nouvelle ligne
+    char *pos = strchr(chaine, '\n');
+    
+    // Si le caractère de nouvelle ligne est trouvé, le remplacer par '\0'
+    if (pos != NULL) {
+        *pos = '\0';
+    }
 }
 
 void *server_tcp() {
@@ -214,7 +226,8 @@ void *server_tcp() {
         // Reception joueur actif
         if (buffer_server[0] == 'M') {
             printf("M : Joueur %c joue\n", buffer_server[2]);
-            if (atoi(&buffer_server[2]) == myId) {
+            joueur_actif = atoi(&buffer_server[2]);
+            if (joueur_actif == myId) {
                 myTurn = 1;
                 //printf("C'est à mon tour de jouer\n");
             }
@@ -235,9 +248,12 @@ void *server_tcp() {
         // Proposition coupable
         if (buffer_server[0] == 'F') {
             if (atoi(&buffer_server[4]) == 1) {
-                printf("F : Partie gagné par Joueur %d. Le coupable est %s\n", atoi(&buffer_server[2]), carteNom[atoi(&buffer_server[6])]);
+                printf("F : Partie gagné par %s. Le coupable est %s\n", playerName[atoi(&buffer_server[2])], carteNom[atoi(&buffer_server[6])]);
                 quit = 1;
                 myTurn = 0;
+                joueur_actif = -1;
+                coupable = atoi(&buffer_server[6]);
+                gagnant = atoi(&buffer_server[2]);
             }
             else printf("F : Le joueur %d s'est trompé en denoncant %s\n", atoi(&buffer_server[2]), carteNom[atoi(&buffer_server[6])]);
         }
@@ -246,6 +262,7 @@ void *server_tcp() {
         if (buffer_server[0] == 'T') {
             //sscanf(msgDisplay, "T %s");
             strcpy(msgDisplay, buffer_server + 2);
+            supprimer_nouvelle_ligne(msgDisplay);
         }
 
 		close(newsockfd);

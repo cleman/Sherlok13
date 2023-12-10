@@ -8,5 +8,8 @@ extern int myTurn;
 extern int tableCartes[4][8];
 extern int quit;
 extern char msgDisplay[128];
+extern int joueur_actif;
+extern int coupable;
+extern int gagnant;
 
 #endif
