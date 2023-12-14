@@ -35,39 +35,39 @@ int coupable = -1;
 
 int main(int argc, char *argv[])
 {
+	// Variable de tests
 	int isCarteWrite = 0, isMyIdWrite = 0;
 
+	// Traitement arguments
 	if (argc<6)
 	{
 		fprintf(stderr,"./client <server_address> <server_numport> <your_server_address> <your_server_numport> <nom\n");
 		fprintf(stderr,"ex: ./client localhost 32000 joe localhost 32001\n");
 		return 1;
 	}
-	//my_server_adress = *argv[4];
-	my_server_numport = atoi(argv[4]);
 
-	pthread_t tid_server, tid_graph;
+	my_server_numport = atoi(argv[4]);	// Numéro de port du server
+	server_address = argv[1];			// Adresse IP du server
 
-	pthread_create(&tid_server, NULL, server_tcp, NULL);
-	pthread_create(&tid_graph, NULL, thread_graphique_fn, NULL);
+	pthread_t tid_server, tid_graph;	// tid thread
+
+	pthread_create(&tid_server, NULL, server_tcp, NULL);			// Thread server
+	pthread_create(&tid_graph, NULL, thread_graphique_fn, NULL);	// Thread graphique
 	char *msg = malloc(256);
-	sprintf(msg, "C %s %d %s", argv[3], atoi(argv[4]), argv[5]);
-	//printf("Message : %s\n", msg);
+	sprintf(msg, "C %s %d %s", argv[3], atoi(argv[4]), argv[5]);	// Message de connexion
 
-	server_address = argv[1];
-
-	while (isWantConnect == 0);
+	while (isWantConnect == 0);		// Attente bouton Connexion
 	isWantConnect = 0;
-	send_message(server_address, atoi(argv[2]), msg);
+	send_message(server_address, atoi(argv[2]), msg);	// Envoi message de connexion
 
 	while (!quit) {
-		//sleep(5);
-		//send_message(argv[1], atoi(argv[2]), "Message récurrent");
-		if (isWantSend) {
+		// Envoi des messages d'action, défini dans le thread graphique
+		if (isWantSend) {	
 			isWantSend = 0;
 			send_message(server_address, atoi(argv[2]), sendBuffer);
 		}
 
+		// Affichage des cartes et du tableau en début de partie
 		if (isCarteWrite == 0 && nb_carte == 3) {
 			isCarteWrite = 1;
 			printf("Mes cartes sont : %d %d %d\n", myDeck[0], myDeck[1], myDeck[2]);
@@ -77,11 +77,13 @@ int main(int argc, char *argv[])
 			create_table();
 			print_playerValue();
 		}
+		// Affichage de l'ID lorsque reçu
 		if (isMyIdWrite == 0 && myId != -1) {
 			isMyIdWrite = 1;
 			printf("Je suis connecté\n");
 			printf("Mon identifiant est : %d\n", myId);
 		}
+		// Affichage liste des joueurs avant début de partie
 		if (synchro_L) {
 			synchro_L = 0;
 			printf("Liste des joueurs : ");

@@ -14,45 +14,19 @@ int quit_graph;
 
 void *thread_graphique_fn()
 {
-    //int ret;
 	int i,j;
-
     SDL_Event event;
 	int mx,my;
-	
-	//char lname[256];
-	//int id;
-
     int connectEnabled;
-
-    //char gClientIpAddress[256];
-    //int gClientPort;
-    //char gName[256];
-
-    // Variable relatives aux actions
     int joueurSel;
     int objetSel;
     int guiltSel;
-
     int guiltGuess[13];
-
     char *nbobjets[]={"5","5","5","5","4","3","3","3"};
     char *nbnoms[]={"Sebastian Moran", "irene Adler", "inspector Lestrade",
     "inspector Gregson", "inspector Baynes", "inspector Bradstreet",
     "inspector Hopkins", "Sherlock Holmes", "John Watson", "Mycroft Holmes",
     "Mrs. Hudson", "Mary Morstan", "James Moriarty"};
-
-    //volatile int synchro;
-    
-    //char gbuffer[256];
-    //char gServerIpAddress[256];
-    //int gServerPort;
-
-    //strcpy(gServerIpAddress,argv[1]);
-    //gServerPort=atoi(argv[2]);
-    //strcpy(gClientIpAddress,argv[3]);
-    //gClientPort=atoi(argv[4]);
-    //strcpy(gName,argv[5]);
 
     SDL_Init(SDL_INIT_VIDEO);
     TTF_Init();
@@ -205,45 +179,6 @@ void *thread_graphique_fn()
             }
         }
 
-        /*if (synchro == 1)
-        {
-            //printf("consomme |%s|\n", gbuffer);
-            switch (gbuffer[0])
-            {
-            // Message 'I' : le joueur recoit son Id
-            case 'I':
-                // RAJOUTER DU CODE ICI
-
-                break;
-            // Message 'L' : le joueur recoit la liste des joueurs
-            case 'L':
-                // RAJOUTER DU CODE ICI
-
-                break;
-            // Message 'D' : le joueur recoit ses trois cartes
-            case 'D':
-                // RAJOUTER DU CODE ICI
-
-                break;
-            // Message 'M' : le joueur recoit le n° du joueur courant
-            // Cela permet d'affecter myTurn pour autoriser l'affichage du bouton go
-            case 'M':
-                // RAJOUTER DU CODE ICI
-
-                break;
-            // Message 'V' : le joueur recoit une valeur de tableCartes
-            case 'V':
-                // RAJOUTER DU CODE ICI
-
-                break;
-            }
-            synchro = 0;
-        }*/
-
-        //SDL_Rect dstrect_grille = {512 - 250, 10, 500, 350};
-        //SDL_Rect dstrect_image = {0, 0, 500, 330};
-        //SDL_Rect dstrect_image1 = {0, 340, 250, 330 / 2};
-
         SDL_SetRenderDrawColor(renderer, 255, 230, 230, 230);
         SDL_Rect rect = {0, 0, 1024, 768};
         SDL_RenderFillRect(renderer, &rect);
@@ -305,7 +240,7 @@ void *thread_graphique_fn()
             SDL_FreeSurface(surfaceMessage);
         }
 
-        // Message affiché
+        // Message à afficher
         SDL_Surface *surfaceMessage = TTF_RenderText_Solid(Sans, msgDisplay, col1);
         SDL_Texture *Message = SDL_CreateTextureFromSurface(renderer, surfaceMessage);
 
@@ -319,12 +254,13 @@ void *thread_graphique_fn()
         SDL_DestroyTexture(Message);
         SDL_FreeSurface(surfaceMessage);
 
+        // Noms des personnages
         SDL_Color red = {255, 0, 0};
         for (i = 0; i < 13; i++)
         {
             SDL_Surface *surfaceMessage;
-            if (quit && i == coupable) surfaceMessage = TTF_RenderText_Solid(Sans, nbnoms[i], red);
-            else surfaceMessage = TTF_RenderText_Solid(Sans, nbnoms[i], col1);
+            if (quit && i == coupable) surfaceMessage = TTF_RenderText_Solid(Sans, nbnoms[i], red);     // Coupable trouvé
+            else surfaceMessage = TTF_RenderText_Solid(Sans, nbnoms[i], col1);                          // Autre
             SDL_Texture *Message = SDL_CreateTextureFromSurface(renderer, surfaceMessage);
 
             SDL_Rect Message_rect;
@@ -582,9 +518,9 @@ void *thread_graphique_fn()
             if (strlen(playerName[i]) > 0)
             {
                 SDL_Surface *surfaceMessage;
-                if (joueur_actif == i) surfaceMessage = TTF_RenderText_Solid(Sans, playerName[i], blue);
-                else if (gagnant == i) surfaceMessage = TTF_RenderText_Solid(Sans, playerName[i], green);
-                else surfaceMessage = TTF_RenderText_Solid(Sans, playerName[i], col);
+                if (joueur_actif == i) surfaceMessage = TTF_RenderText_Solid(Sans, playerName[i], blue);    // joueur actif
+                else if (gagnant == i) surfaceMessage = TTF_RenderText_Solid(Sans, playerName[i], green);   // Joueur gagnant
+                else surfaceMessage = TTF_RenderText_Solid(Sans, playerName[i], col);                       // Autre
                 SDL_Texture *Message = SDL_CreateTextureFromSurface(renderer, surfaceMessage);
 
                 SDL_Rect Message_rect;              // create a rect

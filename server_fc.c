@@ -96,12 +96,14 @@ void fc_act_3(client (*tab)[4], char *buffer) {
     sleep(1);
 }
 
+// Affichages des cartes
 void print_card() {
     for (int i = 0; i < 13; i++) {
         printf("Carte %d : %s\n", deck[i], carteNom[deck[i]]);
     }
 }
 
+// Affichage de la grille des figures
 void print_playerValue() {
     for (int i = 0; i < 4; i++) {
         printf("Joueur %d : ", i);
@@ -112,6 +114,7 @@ void print_playerValue() {
     }
 }
 
+// Melange des cartes
 void shuffle_card() {
     srand(time(NULL));
     int index1, index2, temp;
@@ -139,12 +142,10 @@ void shuffle_card() {
     }
 }
 
+// Traitement message de type C
 void traitement_C(char *buffer, client (*tab)[4], int *nb_joueur) {
-    //printf("Le message reçu \"%s\"\n", buffer);
     char data[3][64];
     sscanf(buffer, "C %s %s %s", data[0], data[1], data[2]);
-    // Attrivuer au tableau
-    //printf("nb in fc  : %d\n", *nb_joueur);
     (*tab)[*nb_joueur].ip_addr = strdup(data[0]);
     (*tab)[*nb_joueur].numport = atoi(data[1]);
     (*tab)[*nb_joueur].nom = strdup(data[2]);
@@ -152,6 +153,7 @@ void traitement_C(char *buffer, client (*tab)[4], int *nb_joueur) {
     (*nb_joueur)++;
 }
 
+// Envoi liste joueur 
 void send_list(client (*tab)[4], int nb_joueur) {
     char msg[128];
     sprintf(msg, "L %s %s %s %s", (*tab)[0].nom, (*tab)[1].nom, (*tab)[2].nom, (*tab)[3].nom);
@@ -160,18 +162,15 @@ void send_list(client (*tab)[4], int nb_joueur) {
     }
 }
 
-
+// Broadcast
 void bc(client(*tab)[4], char *message) {
     for (int i = 0; i < 4; i++) {
         send_message((*tab)[i].ip_addr, (*tab)[i].numport, message);
     }
 }
 
+// Envoi message personnel
 int send_message(char *ip_addr, int portno, char *message) {
-    //printf("adresse ip : %s\n", ip_addr);
-    //printf("Port : %d\n", portno);
-    //printf("message : %s\n", message);
-
     int sockfd;
     struct sockaddr_in serv_addr;
 	struct hostent *server;
@@ -199,9 +198,6 @@ int send_message(char *ip_addr, int portno, char *message) {
     bcopy((char *)server->h_addr, (char *)&serv_addr.sin_addr.s_addr, server->h_length);
     serv_addr.sin_port = htons(portno);
 
-	// On se connecte. L'OS local nous trouve un numéro de port, grâce auquel le serveur
-	// peut nous renvoyer des réponses
-
     if (connect(sockfd,(struct sockaddr *) &serv_addr,sizeof(serv_addr)) < 0) 
 	{
 		fprintf(stderr,"Impossible de faire l'appel system connect().\n");
@@ -212,10 +208,6 @@ int send_message(char *ip_addr, int portno, char *message) {
     write(sockfd,buffer,strlen(buffer));
 
 	// On ferme la socket
-
     close(sockfd);
-
-    //printf("Message envoyé\n");
-
     return 0;
 }

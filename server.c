@@ -64,7 +64,6 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-
 	// On commence à écouter sur la socket. Le 5 est le nombre max
 	// de connexions pendantes
 
@@ -75,6 +74,7 @@ int main(int argc, char *argv[])
     listen(sockfd,5);
 	while (!quit)
 	{
+		// Lancement partie
 		if (nb_joueur == 4 && isStart == 0) {
 			isStart = 1;
 			joueur_actif = -1;
@@ -83,6 +83,7 @@ int main(int argc, char *argv[])
 			char msg_G = 'D';
 			bc(&tab, &msg_G);
 		}
+		// Donne les cartes
 		if (nb_joueur == 4 && isCardGive == 0) {
 			isCardGive = 1;
 			char msg_v[16];
@@ -111,6 +112,7 @@ int main(int argc, char *argv[])
 			bc(&tab, msg_T);
 		}
 
+		// Attente message et reception
 		clilen = sizeof(cli_addr);
 		newsockfd = accept(sockfd, (struct sockaddr *) &cli_addr, &clilen);
 		if (newsockfd < 0) 
@@ -128,9 +130,11 @@ int main(int argc, char *argv[])
 			return 1;
 		}
 
+		// Affiche message reçu
 		//printf("Received packet from %s:%d\nData: [%s]\n\n",
 		//inet_ntoa(cli_addr.sin_addr), ntohs(cli_addr.sin_port), buffer);
-		//printf("Premier caractère : %c\n", buffer[0]);
+		
+		// Message de type C
 		if (buffer[0] == 'C') {		// Première connexion
 			traitement_C(buffer, &tab, &nb_joueur);
 
@@ -149,24 +153,28 @@ int main(int argc, char *argv[])
 				send_message(tab[i].ip_addr, tab[i].numport, msg_T);
 			}			
 		}
+		// Message de type O
 		else if (buffer[0] == 'O') {		// Action 1 (all)
 			if (atoi(&buffer[2]) == joueur_actif) {
 				fc_act_1(&tab, buffer, joueur_actif);
 				nextStep = 1;
 			}
 		}
+		// Message de type S
 		else if (buffer[0] == 'S') {		// Action 2 (private)
 			if (atoi(&buffer[2]) == joueur_actif) {
 				fc_act_2(&tab, buffer);
 				nextStep = 1;
 			}
 		}
+		// Message de type G
 		else if (buffer[0] == 'G') {		// Action 3 (accusation)
 			if (atoi(&buffer[2]) == joueur_actif) {
 				fc_act_3(&tab, buffer);
 				nextStep = 1;
 			}
 		}
+		// Message de type F
 		else if (buffer[0] == 'F') {		// Fin
 			char msg_F[16];
 			sprintf(msg_F, "F");

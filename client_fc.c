@@ -42,22 +42,25 @@ int cardsValue[13][8] = {
     {0,0,0,0,1,1,0,0},
     {0,1,0,0,0,0,0,1}};
 
-char buffer_server[256];
-int my_server_numport;
-char my_server_adress;
-char *server_address;
-int nb_carte = 0;
+char buffer_server[256];    // Buffer du message à envoyer
+int my_server_numport;      // portno client (server)
+char my_server_adress;      // IP client (server)
+char *server_address;       // IP sever
+int nb_carte = 0;           // Nombre de carte reçu
 int synchro_L = 0;
 int isWantCopytable = 0;
-int joueur_actif = -1;
-int gagnant = -1;
+int joueur_actif = -1;      // ID du joueur actif
+int gagnant = -1;           // ID du joueur gagnant
 
 #include "global_var.h"
 
+// Création de la grille 4*8
 void create_table() {
+    // Initialisation
     for (int j = 0; j < 8; j++) {
         tableCartes[myId][j] = 0;
     }
+    // Remplissage
     for (int i = 0; i < 3; i++) {
         for (int j = 0; j < 8; j++) {
             tableCartes[myId][j] += cardsValue[myDeck[i]][j];
@@ -65,6 +68,7 @@ void create_table() {
     }
 }
 
+// Affichage de la grille 4*8
 void print_playerValue() {
     for (int i = 0; i < 4; i++) {
         printf("Joueur %d : ", i);
@@ -77,11 +81,8 @@ void print_playerValue() {
     }
 }
 
+// Envoi de message vers ip_addr:portno
 int send_message(char *ip_addr, int portno, char *message) {
-    //printf("adresse ip : %s\n", ip_addr);
-    //printf("Port : %d\n", portno);
-    //printf("message : %s\n", message);
-
     int sockfd;
     struct sockaddr_in serv_addr;
 	struct hostent *server;
@@ -130,6 +131,7 @@ int send_message(char *ip_addr, int portno, char *message) {
     return 0;
 }
 
+// Suppresion caractère saut de ligne
 void supprimer_nouvelle_ligne(char *chaine) {
     // Recherche de la position du caractère de nouvelle ligne
     char *pos = strchr(chaine, '\n');
@@ -140,6 +142,7 @@ void supprimer_nouvelle_ligne(char *chaine) {
     }
 }
 
+// thread server du client
 void *server_tcp() {
     int sockfd, newsockfd, portno;
     socklen_t clilen;
@@ -227,14 +230,13 @@ void *server_tcp() {
         if (buffer_server[0] == 'M') {
             printf("M : Joueur %c joue\n", buffer_server[2]);
             joueur_actif = atoi(&buffer_server[2]);
-            if (joueur_actif == myId) {
+            if (joueur_actif == myId) {     // Mon tour ?
                 myTurn = 1;
-                //printf("C'est à mon tour de jouer\n");
             }
             else myTurn = 0;
         }
 
-        // Retour action 1
+        // Retour action 1 et 2
         if (buffer_server[0] == 'R') {
             int obj, id_j, data;
             sscanf(buffer_server, "R %d %d %d", &id_j, &obj, &data);
@@ -258,7 +260,7 @@ void *server_tcp() {
             else printf("F : Le joueur %d s'est trompé en denoncant %s\n", atoi(&buffer_server[2]), carteNom[atoi(&buffer_server[6])]);
         }
         
-        // Message to display
+        // Message à afficher
         if (buffer_server[0] == 'T') {
             //sscanf(msgDisplay, "T %s");
             strcpy(msgDisplay, buffer_server + 2);
