@@ -1,9 +1,0 @@
-{
-    "files.associations": {
-        "in.h": "c",
-        "stdio.h": "c",
-        "netdb.h": "c",
-        "pthread.h": "c",
-        "client_fc.h": "c"
-    }
-}
