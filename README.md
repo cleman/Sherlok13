@@ -2,7 +2,7 @@
 
 ## Description
 
-**Sherlock13** is a deduction game inspired by the classic Clue/Cluedo. In this game, four players aim to identify the culprit among 13 characters by exchanging information about the figures on their respective character cards. Each player receives three cards, each depicting a character with one of eight possible figures: ampoule, carnet, collier, couronne, crane, oeil, pipe, and poing. The goal is to deduce the undiscovered card (culprit) by gathering information about the figures held by other players.
+**Sherlock13** is a deduction game inspired by the classic Clue/Cluedo. In this game, four players aim to identify the culprit among 13 characters by exchanging information about the figures on their respective character cards. Each player receives three cards, each depicting a character with one of eight possible figures: bulb, notebook, necklace, crown, skull, eye, pipe, and fist. The goal is to deduce the undiscovered card (culprit) by gathering information about the figures held by other players.
 
 ## Gameplay
 
